@@ -1,0 +1,27 @@
+apiVersion: tf.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  credentials:
+    - filename: gcp-credentials.json
+      source: Secret
+      secretRef:
+        namespace: upbound-system
+        name: tf-gcp-creds
+        key: creds
+  configuration: |
+    provider "google" {
+      credentials = "gcp-credentials.json"
+      project     = "wise-resolver-422510-b6"
+    }
+
+    // Modules _must_ use remote state. The provider does not persist state.
+    terraform {
+      backend "kubernetes" {
+        secret_suffix     = "providerconfig-default"
+        namespace         = "upbound-system"
+        in_cluster_config = true
+      }
+    }
+
